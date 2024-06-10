@@ -4,7 +4,7 @@ import { ThemeProvider, createTheme } from '@mui/material/styles';
 import AppAppBar from './components/AppAppBar';
 import Hero from './components/Hero';
 import getLPTheme from './styles/getLPTheme';
-import web3 from './web3';
+import web3 from './web3/web3';
 
 export default function LandingPage() {
   const LPtheme = createTheme(getLPTheme('dark'));
