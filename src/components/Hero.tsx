@@ -1,5 +1,5 @@
-import * as React from "react";
-import { alpha } from "@mui/material";
+import { useState, useEffect } from "react";
+import { Divider, alpha } from "@mui/material";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Container from "@mui/material/Container";
@@ -8,18 +8,26 @@ import Stack from "@mui/material/Stack";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import lottery from "../web3/lottery";
+import web3 from "../web3/web3";
 
 export default function Hero() {
-  const [manager, setManager] = React.useState<any>();
+	const [lotteryValues, setLotteryValues] = useState<any>({
+		manager: "",
+		players: [],
+		balance: "",
+	});
+	const [amountEther, setAmountEther] = useState("");
 
-  async function getManager() {
-    const lotteryManager = await lottery.methods.manager().call();
-    setManager(lotteryManager);
-  }
+	async function getManager() {
+		const manager = await lottery.methods.manager().call();
+		const players = await lottery.methods.getPlayers().call();
+		const balance = web3.eth.getBalance(lottery.options.address!);
+		setLotteryValues({ manager, players, balance });
+	}
 
-  React.useEffect(() => {
-    getManager();
-  },[])
+	useEffect(() => {
+		getManager();
+	}, []);
 
 	return (
 		<Box
@@ -73,28 +81,6 @@ export default function Hero() {
 						solutions tailored to your needs. Elevate your experience with
 						top-tier features and services.
 					</Typography>
-					<Stack
-						direction={{ xs: "column", sm: "row" }}
-						alignSelf="center"
-						spacing={1}
-						useFlexGap
-						sx={{ pt: 2, width: { xs: "100%", sm: "auto" } }}>
-						<TextField
-							id="outlined-basic"
-							hiddenLabel
-							size="small"
-							variant="outlined"
-							aria-label="Enter your email address"
-							placeholder="Your email address"
-							inputProps={{
-								autoComplete: "off",
-								"aria-label": "Enter your email address",
-							}}
-						/>
-						<Button variant="contained" color="primary">
-							Start now
-						</Button>
-					</Stack>
 					<Typography
 						variant="caption"
 						textAlign="center"
@@ -112,6 +98,7 @@ export default function Hero() {
 						mt: { xs: 8, sm: 10 },
 						alignSelf: "center",
 						height: { xs: 200, sm: 700 },
+						padding: "40px",
 						width: "100%",
 						borderRadius: "10px",
 						outline: "1px solid",
@@ -125,17 +112,54 @@ export default function Hero() {
 								: `0 0 24px 12px ${alpha("#033363", 0.2)}`,
 					})}>
 					<Typography
-						textAlign="center"
-						color="text.secondary"
+						variant="h6"
+						color="text.primary"
 						sx={{ width: { sm: "100%", md: "80%" } }}>
 						Lottery Contract
 					</Typography>
 					<Typography
-						textAlign="center"
 						color="text.secondary"
 						sx={{ width: { sm: "100%", md: "80%" } }}>
-						This contract is managed by {manager}
+						This contract is managed by {lotteryValues.manager} {"\n"}. There
+						are currently {lotteryValues.players?.length} people entered,
+						competing to win{" "}
+						{lotteryValues.balance ? web3.utils.fromWei(1000, "ether") : 0}{" "}
+						ether!
 					</Typography>
+					<Divider sx={() => ({ paddingY: 2 })} />
+					<Box paddingY={5}>
+						<Typography
+							variant="h5"
+							color="text.primary"
+							sx={{ width: { sm: "100%", md: "80%" } }}>
+							Want to try your luck?
+						</Typography>
+						<Stack
+							direction={{ xs: "column", sm: "row" }}
+							alignSelf="center"
+							spacing={1}
+							useFlexGap
+							sx={{ pt: 2, width: { xs: "100%", sm: "auto" } }}>
+							<TextField
+								id="outlined-basic"
+								hiddenLabel
+								size="small"
+								type="number"
+								value={amountEther}
+								onChange={(e) => setAmountEther(e.target.value)}
+								variant="outlined"
+								aria-label="amount-eter"
+								placeholder="Amount of ether to enter"
+								inputProps={{
+									autoComplete: "off",
+									"aria-label": "amount-eter",
+								}}
+							/>
+							<Button variant="contained" color="primary">
+								Enter
+							</Button>
+						</Stack>
+					</Box>
 				</Box>
 			</Container>
 		</Box>
