@@ -1,11 +1,12 @@
 import { useState, useEffect } from "react";
-import { Divider, alpha } from "@mui/material";
+import { CircularProgress, Dialog, DialogTitle, Divider, alpha } from "@mui/material";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Container from "@mui/material/Container";
 import Link from "@mui/material/Link";
 import Stack from "@mui/material/Stack";
 import TextField from "@mui/material/TextField";
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import Typography from "@mui/material/Typography";
 import lottery from "../web3/lottery";
 import web3 from "../web3/web3";
@@ -17,6 +18,9 @@ export default function Hero() {
 		balance: "",
 	});
 	const [amountEther, setAmountEther] = useState("");
+	const [loadingMsg, setLoadingMsg] = useState("");
+	const [open, setOpen] = useState(true);
+	const [feedbackImg, setFeedbackImg] = useState("loading");
 
 	async function getManager() {
 		const manager = await lottery.methods.manager().call();
@@ -28,6 +32,21 @@ export default function Hero() {
 	useEffect(() => {
 		getManager();
 	}, []);
+
+	const onSubmit = async () => {
+		const accounts = await web3.eth.getAccounts();
+		setLoadingMsg("Waiting on transaction success...");
+		setFeedbackImg("loading");
+		setOpen(true);
+
+		await lottery.methods.enter().send({
+			from: accounts[0],
+			value: web3.utils.toWei(amountEther, "ether"),
+		});
+
+		setLoadingMsg("Waiting on transaction success...");
+		setFeedbackImg("success");
+	};
 
 	return (
 		<Box
@@ -155,13 +174,27 @@ export default function Hero() {
 									"aria-label": "amount-eter",
 								}}
 							/>
-							<Button variant="contained" color="primary">
+							<Button onClick={onSubmit} variant="contained" color="primary">
 								Enter
 							</Button>
 						</Stack>
 					</Box>
 				</Box>
 			</Container>
+			<Dialog onClose={() => setOpen(false)} open={open}>
+				<DialogTitle>{loadingMsg}</DialogTitle>
+				<Box
+					component="form"
+					sx={{
+						display: "flex",
+						flexDirection: "column",
+						m: "auto",
+						width: 500,
+						height: 300
+					}}>
+						{feedbackImg === "loading" ?<Box sx={{ display: 'flex', alignSelf: "center" }}> <CircularProgress color="primary" /> </Box>: <CheckCircleIcon color="success" fontSize="large" />}
+					</Box>
+			</Dialog>
 		</Box>
 	);
 }
