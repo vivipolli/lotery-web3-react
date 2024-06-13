@@ -1,12 +1,17 @@
 import { useState, useEffect } from "react";
-import { CircularProgress, Dialog, DialogTitle, Divider, alpha } from "@mui/material";
+import {
+	CircularProgress,
+	Dialog,
+	DialogTitle,
+	Divider,
+	alpha,
+} from "@mui/material";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Container from "@mui/material/Container";
-import Link from "@mui/material/Link";
 import Stack from "@mui/material/Stack";
 import TextField from "@mui/material/TextField";
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import Typography from "@mui/material/Typography";
 import lottery from "../web3/lottery";
 import web3 from "../web3/web3";
@@ -19,7 +24,7 @@ export default function Hero() {
 	});
 	const [amountEther, setAmountEther] = useState("");
 	const [loadingMsg, setLoadingMsg] = useState("");
-	const [open, setOpen] = useState(true);
+	const [open, setOpen] = useState(false);
 	const [feedbackImg, setFeedbackImg] = useState("loading");
 
 	async function getManager() {
@@ -33,19 +38,34 @@ export default function Hero() {
 		getManager();
 	}, []);
 
-	const onSubmit = async () => {
-		const accounts = await web3.eth.getAccounts();
+	const handleTransaction = async (transactionMethod: () => Promise<any>) => {
 		setLoadingMsg("Waiting on transaction success...");
 		setFeedbackImg("loading");
 		setOpen(true);
 
-		await lottery.methods.enter().send({
-			from: accounts[0],
-			value: web3.utils.toWei(amountEther, "ether"),
-		});
+		await transactionMethod();
 
-		setLoadingMsg("Waiting on transaction success...");
+		setLoadingMsg("Transaction success!");
 		setFeedbackImg("success");
+	};
+
+	const onSubmit = async () => {
+		const accounts = await web3.eth.getAccounts();
+		await handleTransaction(() =>
+			lottery.methods.enter().send({
+				from: accounts[0],
+				value: web3.utils.toWei(amountEther, "ether"),
+			})
+		);
+	};
+
+	const onClick = async () => {
+		const accounts = await web3.eth.getAccounts();
+		await handleTransaction(() =>
+			lottery.methods.pickWinner().send({
+				from: accounts[0],
+			})
+		);
 	};
 
 	return (
@@ -96,19 +116,9 @@ export default function Hero() {
 						textAlign="center"
 						color="text.secondary"
 						sx={{ alignSelf: "center", width: { sm: "100%", md: "80%" } }}>
-						Explore our cutting-edge dashboard, delivering high-quality
-						solutions tailored to your needs. Elevate your experience with
-						top-tier features and services.
-					</Typography>
-					<Typography
-						variant="caption"
-						textAlign="center"
-						sx={{ opacity: 0.8 }}>
-						By clicking &quot;Start now&quot; you agree to our&nbsp;
-						<Link href="#" color="primary">
-							Terms & Conditions
-						</Link>
-						.
+						This is a decentralized app that simulates a betting platform using
+						solidity, node, react, typescript and web3.js. Explore the universe
+						of emerging technologies like Web3.
 					</Typography>
 				</Stack>
 				<Box
@@ -179,6 +189,17 @@ export default function Hero() {
 							</Button>
 						</Stack>
 					</Box>
+					<Box>
+						<Typography
+							variant="h5"
+							color="text.primary"
+							sx={{ width: { sm: "100%", md: "80%" } }}>
+							Ready to pick a winner?
+						</Typography>
+						<Button onClick={onClick} variant="contained" color="primary">
+							Pick a winner!
+						</Button>
+					</Box>
 				</Box>
 			</Container>
 			<Dialog onClose={() => setOpen(false)} open={open}>
@@ -190,10 +211,17 @@ export default function Hero() {
 						flexDirection: "column",
 						m: "auto",
 						width: 500,
-						height: 300
+						height: 300,
 					}}>
-						{feedbackImg === "loading" ?<Box sx={{ display: 'flex', alignSelf: "center" }}> <CircularProgress color="primary" /> </Box>: <CheckCircleIcon color="success" fontSize="large" />}
-					</Box>
+					{feedbackImg === "loading" ? (
+						<Box sx={{ display: "flex", alignSelf: "center" }}>
+							{" "}
+							<CircularProgress color="primary" />{" "}
+						</Box>
+					) : (
+						<CheckCircleIcon color="success" fontSize="large" />
+					)}
+				</Box>
 			</Dialog>
 		</Box>
 	);

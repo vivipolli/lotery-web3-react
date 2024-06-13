@@ -21,7 +21,7 @@ export default function LandingPage() {
   return (
     <ThemeProvider theme={LPtheme}>
       <CssBaseline />
-      <AppAppBar />
+      {/* <AppAppBar /> */}
       <Hero />
     </ThemeProvider>
   );

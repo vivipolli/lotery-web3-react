@@ -1,4 +1,6 @@
 import web3 from "./web3";
+import { ContractAbi } from "web3";
+
 
 const address = '0x807dA368479111119b0E9336587ea132134b8951';
 
@@ -43,7 +45,7 @@ const abi = [
 	},
 ];
 
-const contract = new web3.eth.Contract(abi, address);
+const contract = new web3.eth.Contract(abi as ContractAbi, address);
 
 
 export default contract;
