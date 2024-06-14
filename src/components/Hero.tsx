@@ -12,6 +12,7 @@ import Container from "@mui/material/Container";
 import Stack from "@mui/material/Stack";
 import TextField from "@mui/material/TextField";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import PriorityHighIcon from "@mui/icons-material/PriorityHigh";
 import Typography from "@mui/material/Typography";
 import lottery from "../web3/lottery";
 import web3 from "../web3/web3";
@@ -28,10 +29,23 @@ export default function Hero() {
 	const [feedbackImg, setFeedbackImg] = useState("loading");
 
 	async function getManager() {
-		const manager = await lottery.methods.manager().call();
-		const players = await lottery.methods.getPlayers().call();
-		const balance = web3.eth.getBalance(lottery.options.address!);
-		setLotteryValues({ manager, players, balance });
+		try {
+			const manager = await lottery.methods.manager().call();
+			const players = await lottery.methods.getPlayers().call();
+			const balance = await web3.eth.getBalance(lottery.options.address!);
+			setLotteryValues({ manager, players, balance });
+			setLoadingMsg(
+				"You shoud have ethereum on sepholia network to test this application"
+			);
+			setFeedbackImg("alert");
+			setOpen(true);
+		} catch (error) {
+			setLoadingMsg(
+				"You shoud have the metamask pluggin installed to test this application"
+			);
+			setFeedbackImg("loading");
+			setOpen(true);
+		}
 	}
 
 	useEffect(() => {
@@ -39,14 +53,18 @@ export default function Hero() {
 	}, []);
 
 	const handleTransaction = async (transactionMethod: () => Promise<any>) => {
-		setLoadingMsg("Waiting on transaction success...");
-		setFeedbackImg("loading");
-		setOpen(true);
+		try {
+			setLoadingMsg("Waiting on transaction success...");
+			setFeedbackImg("loading");
+			setOpen(true);
 
-		await transactionMethod();
+			await transactionMethod();
 
-		setLoadingMsg("Transaction success!");
-		setFeedbackImg("success");
+			setLoadingMsg("Transaction success!");
+			setFeedbackImg("success");
+		} catch (error) {
+			setOpen(false);
+		}
 	};
 
 	const onSubmit = async () => {
@@ -152,7 +170,9 @@ export default function Hero() {
 						This contract is managed by {lotteryValues.manager} {"\n"}. There
 						are currently {lotteryValues.players?.length} people entered,
 						competing to win{" "}
-						{lotteryValues.balance ? web3.utils.fromWei(1000, "ether") : 0}{" "}
+						{lotteryValues.balance
+							? web3.utils.fromWei(lotteryValues.balance, "ether")
+							: 0}{" "}
 						ether!
 					</Typography>
 					<Divider sx={() => ({ paddingY: 2 })} />
@@ -203,21 +223,22 @@ export default function Hero() {
 				</Box>
 			</Container>
 			<Dialog onClose={() => setOpen(false)} open={open}>
-				<DialogTitle>{loadingMsg}</DialogTitle>
+				<DialogTitle marginTop={2}>{loadingMsg}</DialogTitle>
 				<Box
 					component="form"
 					sx={{
 						display: "flex",
 						flexDirection: "column",
 						m: "auto",
-						width: 500,
-						height: 300,
+						p: 10,
 					}}>
 					{feedbackImg === "loading" ? (
 						<Box sx={{ display: "flex", alignSelf: "center" }}>
 							{" "}
 							<CircularProgress color="primary" />{" "}
 						</Box>
+					) : feedbackImg === "alert" ? (
+						<PriorityHighIcon color="info" fontSize="large" />
 					) : (
 						<CheckCircleIcon color="success" fontSize="large" />
 					)}
