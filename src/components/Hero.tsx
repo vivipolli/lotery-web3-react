@@ -116,7 +116,7 @@ export default function Hero() {
 							textAlign: "center",
 							fontSize: "clamp(3.5rem, 10vw, 4rem)",
 						}}>
-						Lotery in&nbsp;
+						Lottery in&nbsp;
 						<Typography
 							component="span"
 							variant="h1"
