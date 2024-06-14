@@ -35,7 +35,7 @@ export default function Hero() {
 			const balance = await web3.eth.getBalance(lottery.options.address!);
 			setLotteryValues({ manager, players, balance });
 			setLoadingMsg(
-				"You shoud have ethereum on sepholia network to test this application"
+				"Make sure you have Ethereum in your wallet to test this application."
 			);
 			setFeedbackImg("alert");
 			setOpen(true);
