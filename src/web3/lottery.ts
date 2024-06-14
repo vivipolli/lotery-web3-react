@@ -2,7 +2,7 @@ import web3 from "./web3";
 import { ContractAbi } from "web3";
 
 
-const address = '0x807dA368479111119b0E9336587ea132134b8951';
+const address = process.env.REACT_APP_CONTRACT_ADDRESS;
 
 const abi = [
 	{ inputs: [], stateMutability: "nonpayable", type: "constructor" },
